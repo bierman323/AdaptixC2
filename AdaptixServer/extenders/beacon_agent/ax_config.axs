@@ -341,9 +341,9 @@ function GenerateUI(listeners_type)
     sideloadingSelector.setVisible(false);
 
     let checkIatHiding = form.create_check("IAT Hiding (empty import table)");
-    if( !listeners_type.includes("BeaconHTTP") && !listeners_type.includes("BeaconDNS") ) {
-        checkIatHiding.setVisible(false);
-    }
+    // if( !listeners_type.includes("BeaconHTTP") && !listeners_type.includes("BeaconDNS") ) {
+    //     checkIatHiding.setVisible(false);
+    // }
 
     //////////////////// DNS Settings
 

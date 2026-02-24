@@ -374,12 +374,20 @@ func (p *PluginAgent) GenerateProfiles(profile adaptix.BuildProfile) ([][]byte, 
 
 		case "http":
 
+			lines, _ := listenerMap["callback_addresses"].([]interface{})
+			UriRaw, _ := listenerMap["uri"].([]interface{})
+			UserAgentRaw, _ := listenerMap["user_agent"].([]interface{})
+			HostHeaderRaw, _ := listenerMap["host_header"].([]interface{})
+
+			HttpMethod, _ := listenerMap["http_method"].(string)
+			Ssl, _ := listenerMap["ssl"].(bool)
+			ParameterName, _ := listenerMap["hb_header"].(string)
+			RequestHeaders, _ := listenerMap["request_headers"].(string)
+
 			var Hosts []string
 			var Ports []int
-			hosts_agent, _ := listenerMap["callback_addresses"].(string)
-			lines := strings.Split(strings.TrimSpace(hosts_agent), ", ")
-			for _, line := range lines {
-				line = strings.TrimSpace(line)
+			for _, i_line := range lines {
+				line := strings.TrimSpace(i_line.(string))
 				if line == "" {
 					continue
 				}
@@ -392,53 +400,28 @@ func (p *PluginAgent) GenerateProfiles(profile adaptix.BuildProfile) ([][]byte, 
 			}
 			c2Count := len(Hosts)
 
-			HttpMethod, _ := listenerMap["http_method"].(string)
-			Ssl, _ := listenerMap["ssl"].(bool)
-			UriRaw, _ := listenerMap["uri"].(string)
-			ParameterName, _ := listenerMap["hb_header"].(string)
-			UserAgentRaw, _ := listenerMap["user_agent"].(string)
-			RequestHeaders, _ := listenerMap["request_headers"].(string)
-			HostHeaderRaw, _ := listenerMap["host_header"].(string)
-
 			var Uris []string
-			for _, u := range strings.Split(UriRaw, "\n") {
-				u = strings.TrimSpace(u)
+			for _, i_line := range UriRaw {
+				u := strings.TrimSpace(i_line.(string))
 				if u != "" {
 					Uris = append(Uris, u)
 				}
 			}
-			if len(Uris) == 0 {
-				Uris = append(Uris, UriRaw)
-			}
 
 			var UserAgents []string
-			for _, ua := range strings.Split(UserAgentRaw, "\n") {
-				ua = strings.TrimSpace(ua)
+			for _, i_line := range UserAgentRaw {
+				ua := strings.TrimSpace(i_line.(string))
 				if ua != "" {
 					UserAgents = append(UserAgents, ua)
 				}
 			}
-			if len(UserAgents) == 0 {
-				UserAgents = append(UserAgents, UserAgentRaw)
-			}
 
 			var HostHeaders []string
-			for _, hh := range strings.Split(HostHeaderRaw, "\n") {
-				hh = strings.TrimSpace(hh)
+			for _, i_line := range HostHeaderRaw {
+				hh := strings.TrimSpace(i_line.(string))
 				if hh != "" {
 					HostHeaders = append(HostHeaders, hh)
 				}
-			}
-
-			if len(HostHeaders) > 0 {
-				lines := strings.Split(RequestHeaders, "\r\n")
-				var filtered []string
-				for _, line := range lines {
-					if !strings.HasPrefix(strings.ToLower(line), "host:") {
-						filtered = append(filtered, line)
-					}
-				}
-				RequestHeaders = strings.Join(filtered, "\r\n")
 			}
 
 			WebPageOutput, _ := listenerMap["page-payload"].(string)

